@@ -1,6 +1,6 @@
 // =============================================================================
-// Delivery routing over geonodes (Proyecto 2 §5/§6: "Caminos mínimos entre
-// ubicaciones para reparto eficiente")
+// Delivery routing over geonodes: shortest paths between locations for
+// efficient delivery
 // =============================================================================
 // The :Location nodes form a weighted geonode mesh via :ROUTE {distance_km,
 // minutes}. These queries find minimum-cost paths the courier module consumes.

@@ -67,7 +67,7 @@ flowchart LR
 ```
 
 **Design decision — why a Postgres star schema for serving and Hive for the
-lake.** The course brief asked for an open-source warehouse "like Apache Hive". I use a
+lake.** I wanted the data open to engines like Apache Hive while keeping BI queries fast. I use a
 **medallion lake in Parquet** registered in a **Hive Metastore** (the open
 SQL-on-lakehouse layer) *and* a **PostgreSQL star schema with materialized-view
 OLAP cubes** as the low-latency serving layer Superset reads. Postgres
@@ -78,16 +78,16 @@ two access paths — explained in [`docs/architecture.md`](docs/architecture.md)
 
 ---
 
-## Requirements coverage
+## Capabilities
 
-| # | Requirement | Where |
-|---|-------------|-------|
-| 1 | Data Warehouse + OLAP (star schema, ≥5 cubes by time/location/product/frequency) | [`warehouse/ddl`](warehouse/ddl) — 6 cubes via `ROLLUP`/`CUBE`/`GROUPING SETS` |
-| 2 | Apache Spark (DataFrames + SparkSQL, ≥3 analyses) | [`spark/jobs/analyses.py`](spark/jobs/analyses.py) — trends, peak hours, monthly growth |
-| 3 | Visualization (≥3 dashboards) | [`dashboards/`](dashboards) — Superset, SQL + bootstrap |
-| 4 | Airflow (extract → Spark → load DW → reindex ES) | [`airflow/dags`](airflow/dags) |
-| 5 | Neo4J (co-purchase, influencers, routing paths) | [`neo4j/`](neo4j) — loader + Cypher + GDS |
-| 6 | Delivery routing (geolocation, nearest-neighbour / graph) | [`neo4j/routing`](neo4j/routing) — NN + 2-opt |
+| # | Capability | Where |
+|---|------------|-------|
+| 1 | Star-schema warehouse with 6 OLAP cubes by time, location, product and frequency | [`warehouse/ddl`](warehouse/ddl) — `ROLLUP`/`CUBE`/`GROUPING SETS` |
+| 2 | Spark ELT with DataFrames and SparkSQL, plus 3 analyses | [`spark/jobs/analyses.py`](spark/jobs/analyses.py) — trends, peak hours, monthly growth |
+| 3 | 3 Superset dashboards | [`dashboards/`](dashboards) — SQL datasets + bootstrap |
+| 4 | Airflow orchestration: extract → Spark → load DW → reindex Elasticsearch | [`airflow/dags`](airflow/dags) |
+| 5 | Neo4j graph analytics: co-purchase, influencers, routing paths | [`neo4j/`](neo4j) — loader + Cypher + GDS |
+| 6 | Delivery routing with geolocation: nearest neighbour + 2-opt | [`neo4j/routing`](neo4j/routing) |
 | 7 | Technical documentation (Spanish) | [`docs/`](docs) |
 
 ---

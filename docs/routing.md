@@ -1,6 +1,6 @@
 # Ruteo de reparto
 
-Objetivo (Proyecto 2 §6): simular y optimizar rutas de entrega usando la
+Objetivo: simular y optimizar rutas de entrega usando la
 geolocalización de los clientes, asignando rutas por repartidor.
 
 ## Enfoque

@@ -23,7 +23,8 @@ Proyecto 1 cuando cambia el catálogo.
 
 ## Decisión de diseño: PostgreSQL (servicio) + Hive (lago)
 
-El enunciado pide un almacén "con herramientas open source como Apache Hive".
+El objetivo era un almacén abierto a herramientas open source como Apache Hive,
+sin sacrificar la velocidad de las consultas de BI.
 La solución combina **ambos enfoques** en lugar de elegir uno solo:
 
 - **Hive Metastore + Parquet** registra el lago como tablas externas, dejando los

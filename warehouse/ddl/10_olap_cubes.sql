@@ -6,7 +6,7 @@
 -- totals), which is exactly what an OLAP cube exposes to a BI tool. The
 -- GROUPING() flags let dashboards tell a sub-total row apart from a leaf row.
 --
--- Coverage required by the rubric: time, location, product type, frequency.
+-- Analytical coverage: time, location, product type, frequency.
 --   cube_revenue_time_category .... time x product type (ROLLUP over Y/Q/M)
 --   cube_sales_by_location ........ location           (ROLLUP over prov/cant/dist)
 --   cube_product_frequency ........ product type + frequency of use

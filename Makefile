@@ -1,5 +1,5 @@
 # =============================================================================
-# restaurantes-e2-analytics — developer & grader entrypoints
+# restaurantes-e2-analytics — developer entrypoints
 # =============================================================================
 COMPOSE ?= docker compose
 PY      ?= python

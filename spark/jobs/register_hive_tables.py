@@ -2,8 +2,7 @@
 
 Creates a Hive database `restaurant_lake` with EXTERNAL tables pointing at the
 gold/silver Parquet produced by the pipeline, so the warehouse is queryable with
-HiveQL / Trino / any metastore-aware engine (satisfies the rubric's "herramientas
-open source como Apache Hive"). The Postgres star schema remains the low-latency
+HiveQL / Trino / any metastore-aware engine. The Postgres star schema remains the low-latency
 serving layer for Superset; Hive is the open SQL-on-lakehouse access path over
 the exact same data.
 

@@ -1,9 +1,9 @@
 """Job 3/5 — FACTS: bronze + silver dims -> gold fact tables.
 
 Resolves every business key to its dimension surrogate key and writes the three
-facts (fact_orders, fact_order_items, fact_reservations) to the gold zone,
-partitioned by date_key's year/month-ish prefix is omitted for simplicity; the
-grader can re-partition trivially. These are the tables the warehouse load and
+facts (fact_orders, fact_order_items, fact_reservations) to the gold zone.
+Partitioning by year/month is left out for simplicity and is easy to add.
+These are the tables the warehouse load and
 the cubes consume.
 """
 from __future__ import annotations

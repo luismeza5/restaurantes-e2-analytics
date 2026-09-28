@@ -1,5 +1,5 @@
 // =============================================================================
-// Co-purchase analysis (Proyecto 2 §5: "Los 5 productos más comprados juntos")
+// Co-purchase analysis: the 5 products most often bought together
 // =============================================================================
 
 // --- Q1: Top 5 product PAIRS bought together --------------------------------

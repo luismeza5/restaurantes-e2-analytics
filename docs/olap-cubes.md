@@ -5,7 +5,7 @@ usando operadores OLAP genuinos de SQL (`ROLLUP`, `CUBE`, `GROUPING SETS`). Cada
 cubo incluye una columna `grp_flag = GROUPING(...)` que permite a los dashboards
 distinguir filas hoja de subtotales y del gran total.
 
-| Cubo | Operador | Ejes (dimensiones) | Cobertura del rubro |
+| Cubo | Operador | Ejes (dimensiones) | Cobertura analítica |
 |------|----------|--------------------|---------------------|
 | `cube_revenue_time_category` | `GROUPING SETS` | año › trimestre › mes × categoría | tiempo + tipo de producto |
 | `cube_sales_by_location` | `ROLLUP` | provincia › cantón › distrito (+ zona) | ubicación |

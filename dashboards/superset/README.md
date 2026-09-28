@@ -1,6 +1,6 @@
 # Visualization layer — Apache Superset
 
-Three dashboards are required by the rubric; each is backed by an OLAP cube so
+The platform ships three dashboards; each is backed by an OLAP cube so
 the BI tool only ever reads pre-aggregated, internally-consistent data.
 
 | Dashboard | Source (virtual dataset) | Backing cube |
@@ -50,8 +50,8 @@ creates the **Restaurantes DW** connection and the four virtual datasets.
 - Line — X `month_label`, metric `AVG(cancel_rate_pct)`.
 - Big Number — overall cancel rate (filter `grp_flag = 3` for the grand-total row).
 
-## Deliverable export
+## Exporting dashboards
 
 Once built, export each dashboard from **Dashboards ▸ … ▸ Export** and commit the
-resulting `.zip` under `assets/` so the dashboards are reproducible by the grader.
-Place screenshots there too (referenced from the technical PDF).
+resulting `.zip` under `assets/` so the dashboards are reproducible.
+Place screenshots there too.

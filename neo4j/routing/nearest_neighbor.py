@@ -1,4 +1,4 @@
-"""Delivery route assignment & optimisation (Proyecto 2 §6).
+"""Delivery route assignment & optimisation.
 
 Takes deliverable orders (with customer geolocation), assigns them to couriers by
 GAM zone under a capacity cap, then sequences each courier's stops with a
@@ -6,7 +6,7 @@ nearest-neighbour heuristic refined by 2-opt. Distances use the haversine metric
 the same stop sequence can be re-timed with Neo4j ROUTE minutes (see
 neo4j/cypher/40_routing.cypher) for an ETA-accurate view.
 
-Standalone: reads the lake (bronze/orders) so a grader can run it directly.
+Standalone: reads the lake (bronze/orders), so it can run on its own.
 
     python neo4j/routing/nearest_neighbor.py --couriers 4 --capacity 8 --out routes.json
 """

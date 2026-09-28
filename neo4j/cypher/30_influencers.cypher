@@ -1,6 +1,6 @@
 // =============================================================================
-// Influential users in recommendations (Proyecto 2 §5: "Usuarios que recomiendan
-// a otros" + "usuarios influyentes en recomendaciones")
+// Influential users in recommendations: who refers other customers and whose
+// referrals carry the most weight
 // =============================================================================
 
 // --- Q1: Users who recommend others, ranked by direct referrals -------------

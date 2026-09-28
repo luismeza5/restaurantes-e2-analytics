@@ -9,7 +9,7 @@ Graph model
   (:Location)-[:ROUTE {distance_km, minutes}]->(:Location)   # geonode mesh
 
 The ROUTE mesh turns the GAM locations into geonodes with weighted edges so
-Neo4j GDS can compute minimum-cost delivery paths (Proyecto 2 §5/§6).
+Neo4j GDS can compute minimum-cost delivery paths.
 
 Reads Parquet with pandas (fine at this volume); batches with UNWIND. For very
 large graphs swap in the neo4j-spark connector — the Cypher is identical.

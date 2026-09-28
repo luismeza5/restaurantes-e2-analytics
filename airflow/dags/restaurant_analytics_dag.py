@@ -1,4 +1,4 @@
-"""restaurant_analytics — end-to-end ELT orchestration (Proyecto 2 §4).
+"""restaurant_analytics — end-to-end ELT orchestration.
 
 Daily DAG that:
   1. extracts the OLTP source (Mongo/Postgres/CSV) into the bronze lake,

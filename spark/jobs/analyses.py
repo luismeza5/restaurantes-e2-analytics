@@ -1,7 +1,6 @@
-"""Job 4/5 — ANALYSES: the three required Spark analyses.
+"""Job 4/5 — ANALYSES: the three Spark analyses.
 
-Demonstrates BOTH the DataFrame API and SparkSQL (rubric: "transformaciones con
-Spark DataFrames y SparkSQL"). Each analysis is written to the gold zone and
+Uses both the DataFrame API and SparkSQL. Each analysis is written to the gold zone and
 later loaded to the warehouse so Superset can chart it directly.
 
   1. consumption_trends  — units & revenue per category per month + 3-month
