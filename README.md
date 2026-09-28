@@ -1,5 +1,10 @@
 # restaurantes-e2-analytics
 
+![CI](https://github.com/luismeza5/restaurantes-e2-analytics/actions/workflows/ci.yml/badge.svg)
+![Python](https://img.shields.io/badge/python-3.11-blue)
+![Spark](https://img.shields.io/badge/Apache%20Spark-3.5-E25A1C)
+![License](https://img.shields.io/badge/license-MIT-green)
+
 **A lakehouse + data-warehouse analytics platform for a distributed restaurant
 backend** — Spark ELT, a star-schema warehouse with materialized OLAP cubes,
 Neo4j graph analytics, delivery-route optimisation, Airflow orchestration and
