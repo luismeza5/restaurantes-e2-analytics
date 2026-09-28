@@ -39,6 +39,8 @@ warehouse-init:  ## Apply schema + cubes + indexes to the warehouse
 	  -f - < warehouse/ddl/10_olap_cubes.sql
 	$(COMPOSE) exec -T warehouse-db psql -U warehouse -d warehouse \
 	  -f - < warehouse/ddl/20_indexes.sql
+	$(COMPOSE) exec -T warehouse-db psql -U warehouse -d warehouse \
+	  -f - < warehouse/ddl/30_analysis_tables.sql
 
 etl:  ## Trigger the full Airflow DAG once (inside the stack)
 	$(COMPOSE) exec airflow airflow dags trigger restaurant_analytics

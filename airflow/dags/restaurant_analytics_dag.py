@@ -18,11 +18,10 @@ from __future__ import annotations
 import os
 from datetime import datetime, timedelta
 
+from airflow import DAG
 from airflow.operators.bash import BashOperator
 from airflow.operators.empty import EmptyOperator
 from airflow.operators.python import PythonOperator
-
-from airflow import DAG
 
 PROJECT = os.getenv("PROJECT_DIR", "/opt/project")
 SPARK_MASTER = os.getenv("SPARK_MASTER", "local[*]")

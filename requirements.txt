@@ -10,4 +10,4 @@ requests==2.32.3
 # Dev / test
 pytest==8.2.2
 chispa==0.10.1
-ruff==0.5.0
+ruff==0.15.11

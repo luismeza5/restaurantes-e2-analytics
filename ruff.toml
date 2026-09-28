@@ -9,3 +9,7 @@ ignore = ["E501"]   # long lines in SQL-heavy strings / docstrings are fine
 "tests/*" = ["E402"]            # imports after importorskip
 "spark/jobs/*" = ["E402"]       # imports after sys.path tweaks where present
 "airflow/dags/*" = ["E402"]
+
+[lint.isort]
+# The repo has an airflow/ folder (DAGs); the `airflow` package is still third-party.
+known-third-party = ["airflow"]

@@ -70,7 +70,7 @@ jobs:
       - name: Build warehouse schema + cubes
         env: { PGPASSWORD: warehouse }
         run: |
-          for f in warehouse/ddl/00_schema.sql warehouse/ddl/10_olap_cubes.sql warehouse/ddl/20_indexes.sql; do
+          for f in warehouse/ddl/00_schema.sql warehouse/ddl/10_olap_cubes.sql warehouse/ddl/20_indexes.sql warehouse/ddl/30_analysis_tables.sql; do
             psql -h localhost -U warehouse -d warehouse -v ON_ERROR_STOP=1 -f "$f"
           done
 
