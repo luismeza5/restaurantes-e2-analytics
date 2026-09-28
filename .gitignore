@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# Spark / lake / generated data
+.lake/
+metastore_db/
+derby.log
+spark-warehouse/
+data/source/
+routes.json
+*.log
+
+# Env / secrets
+.env
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

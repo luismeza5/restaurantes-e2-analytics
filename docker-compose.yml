@@ -1,0 +1,155 @@
+# docker-compose.yml — full analytics stack for restaurantes-e2-analytics.
+#
+# Core services (always on):   warehouse-db, neo4j, airflow, superset
+# Optional `lake` profile:     metastore-db, hive-metastore  (Hive SQL-on-lake)
+#
+#   make up            -> core stack
+#   make up-lake       -> core stack + Hive metastore
+#
+# All Spark jobs run inside the airflow container (spark-submit --master local[*]),
+# reading/writing the shared `lake` volume. The Postgres `warehouse-db` is the
+# serving star schema + OLAP cubes that Superset reads.
+
+x-airflow-env: &airflow-env
+  AIRFLOW__CORE__EXECUTOR: LocalExecutor
+  AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+  AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
+  AIRFLOW__CORE__DAGS_FOLDER: /opt/project/airflow/dags
+  # --- pipeline configuration (consumed by the DAG + Spark jobs) ---
+  PROJECT_DIR: /opt/project
+  WAREHOUSE_MODE: lake
+  SPARK_INCLUDE_JDBC: "1"
+  LAKE_PATH: /lake/warehouse
+  SOURCE_KIND: csv
+  SOURCE_PATH: /opt/project/data/source
+  WAREHOUSE_JDBC_URL: jdbc:postgresql://warehouse-db:5432/warehouse
+  WAREHOUSE_USER: warehouse
+  WAREHOUSE_PASSWORD: warehouse
+  NEO4J_URI: bolt://neo4j:7687
+  NEO4J_USER: neo4j
+  NEO4J_PASSWORD: neo4jpass
+  # Set to your Proyecto 1 reindex endpoint to wire the two repos together.
+  PROY1_REINDEX_URL: ""
+
+services:
+  # ---- Serving warehouse: star schema + OLAP cubes -------------------------
+  warehouse-db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: warehouse
+      POSTGRES_PASSWORD: warehouse
+      POSTGRES_DB: warehouse
+    ports: ["5432:5432"]
+    volumes:
+      - warehouse-data:/var/lib/postgresql/data
+      - ./warehouse/ddl:/docker-entrypoint-initdb.d:ro   # auto-applies schema+cubes
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U warehouse"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---- Metadata DB for Airflow --------------------------------------------
+  airflow-db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - airflow-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---- Graph database (with Graph Data Science plugin) ---------------------
+  neo4j:
+    image: neo4j:5.20
+    environment:
+      NEO4J_AUTH: neo4j/neo4jpass
+      NEO4J_PLUGINS: '["graph-data-science"]'
+      NEO4J_dbms_security_procedures_unrestricted: gds.*
+      NEO4J_dbms_security_procedures_allowlist: gds.*
+    ports: ["7474:7474", "7687:7687"]
+    volumes:
+      - neo4j-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:7474 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  # ---- Airflow (init + scheduler + webserver via `standalone`) -------------
+  airflow:
+    build: { context: ., dockerfile: infra/airflow/Dockerfile }
+    depends_on:
+      airflow-db: { condition: service_healthy }
+      warehouse-db: { condition: service_healthy }
+    environment:
+      <<: *airflow-env
+      _AIRFLOW_WWW_USER_USERNAME: admin
+      _AIRFLOW_WWW_USER_PASSWORD: admin
+    ports: ["8080:8080"]
+    volumes:
+      - .:/opt/project
+      - lake:/lake
+    command: >
+      bash -c "airflow db migrate &&
+               airflow users create --username admin --password admin
+                 --firstname a --lastname b --role Admin --email admin@example.com || true &&
+               airflow standalone"
+
+  # ---- Superset (visualization) -------------------------------------------
+  superset:
+    image: apache/superset:3.1.1
+    depends_on:
+      warehouse-db: { condition: service_healthy }
+    environment:
+      SUPERSET_SECRET_KEY: "change-me-in-prod-please-32bytes-min"
+    ports: ["8088:8088"]
+    volumes:
+      - superset-home:/app/superset_home
+    command: >
+      bash -c "pip install psycopg2-binary &&
+               superset db upgrade &&
+               superset fab create-admin --username admin --firstname a --lastname b
+                 --email admin@example.com --password admin || true &&
+               superset init &&
+               gunicorn --bind 0.0.0.0:8088 'superset.app:create_app()'"
+
+  # ---- Hive Metastore (OPTIONAL: `lake` profile) ---------------------------
+  metastore-db:
+    image: postgres:16
+    profiles: ["lake"]
+    environment:
+      POSTGRES_USER: hive
+      POSTGRES_PASSWORD: hive
+      POSTGRES_DB: metastore
+    volumes:
+      - metastore-db-data:/var/lib/postgresql/data
+
+  hive-metastore:
+    image: apache/hive:4.0.0
+    profiles: ["lake"]
+    depends_on: [metastore-db]
+    environment:
+      SERVICE_NAME: metastore
+      DB_DRIVER: postgres
+      SERVICE_OPTS: >-
+        -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver
+        -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://metastore-db:5432/metastore
+        -Djavax.jdo.option.ConnectionUserName=hive
+        -Djavax.jdo.option.ConnectionPassword=hive
+    ports: ["9083:9083"]
+    volumes:
+      - lake:/lake
+
+volumes:
+  warehouse-data:
+  airflow-db-data:
+  neo4j-data:
+  superset-home:
+  metastore-db-data:
+  lake:

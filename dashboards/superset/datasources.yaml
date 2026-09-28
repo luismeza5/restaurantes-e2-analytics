@@ -1,0 +1,16 @@
+# Superset importable database definition.
+# Import via:  Settings ▸ Database Connections ▸ Import, or `superset import-datasources`.
+# The SQLAlchemy URI points at the warehouse service inside the compose network.
+databases:
+  - database_name: Restaurantes DW
+    sqlalchemy_uri: postgresql+psycopg2://warehouse:warehouse@warehouse-db:5432/warehouse
+    expose_in_sqllab: true
+    allow_ctas: true
+    allow_cvas: true
+    allow_dml: false
+    extra: |
+      {
+        "metadata_params": {},
+        "engine_params": {},
+        "schemas_allowed_for_file_upload": []
+      }

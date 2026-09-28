@@ -1,0 +1,99 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up Java (for Spark)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          # Airflow (pinned w/ official constraints) so the DAG-integrity test runs
+          pip install "apache-airflow==2.9.3" \
+            --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.9.3/constraints-3.11.txt"
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Run tests
+        env:
+          AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+          AIRFLOW_HOME: /tmp/airflow
+          SPARK_LOG_LEVEL: ERROR
+          PYTHONPATH: .
+        run: pytest -q
+
+  warehouse-it:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: warehouse
+          POSTGRES_PASSWORD: warehouse
+          POSTGRES_DB: warehouse
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U warehouse"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "17" }
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt postgresql || pip install -r requirements.txt
+          sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Build warehouse schema + cubes
+        env: { PGPASSWORD: warehouse }
+        run: |
+          for f in warehouse/ddl/00_schema.sql warehouse/ddl/10_olap_cubes.sql warehouse/ddl/20_indexes.sql; do
+            psql -h localhost -U warehouse -d warehouse -v ON_ERROR_STOP=1 -f "$f"
+          done
+
+      - name: Seed + run Spark pipeline (local mode) + load warehouse
+        env:
+          PYTHONPATH: .
+          SPARK_LOG_LEVEL: ERROR
+          WAREHOUSE_MODE: local
+          LAKE_PATH: .lake
+          SOURCE_KIND: csv
+          SOURCE_PATH: data/source
+        run: |
+          python data/generate_source.py --orders 5000 --users 400 --reservations 800 --out data/source
+          python spark/jobs/extract.py
+          python spark/jobs/build_dimensions.py
+          python spark/jobs/build_facts.py
+          python spark/jobs/analyses.py
+
+      - name: Warehouse integrity tests
+        env:
+          PYTHONPATH: .
+          WAREHOUSE_TEST_DSN: "host=localhost port=5432 dbname=warehouse user=warehouse password=warehouse"
+        run: |
+          # load gold/silver into the warehouse via the lightweight loader, then test
+          python scripts/load_local_warehouse.py
+          pytest -q tests/test_warehouse_integrity.py
